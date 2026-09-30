@@ -1,54 +1,120 @@
 import random
 
-attempts = 7
+words = {
+    "Animals": ["tiger", "elephant", "penguin", "giraffe", "monkey"],
+    "Technology": ["python", "computer", "internet", "keyboard", "software"],
+    "Food": ["pizza", "burger", "noodles", "sandwich", "chocolate"],
+    "Countries": ["india", "japan", "brazil", "canada", "france"]
+}
 
 
-def display_rules():
-    print("Welcome to Number Guessing Game!\n")
-    print("I have selected a number between 1 and 100.")
-    print("You have 7 attempts to guess it.\n")
+def choose_category():
+    print("\nChoose a category:")
+    categories = list(words.keys())
+
+    for i, category in enumerate(categories, 1):
+        print(i, ".", category)
+
+    while True:
+        choice = input("Enter your choice: ")
+
+        if choice.isdigit() and 1 <= int(choice) <= len(categories):
+            return categories[int(choice) - 1]
+
+        print("Please enter a valid choice.")
 
 
-def play_game(number, attempt=1):
-    if attempt > attempts:
-        print("\nGame Over!")
-        print("The correct number was:", number)
-        return
+def choose_difficulty():
+    print("\nChoose difficulty:")
+    print("1. Easy - 10 attempts")
+    print("2. Medium - 8 attempts")
+    print("3. Hard - 6 attempts")
 
-    guess = input(f"Attempt {attempt}/7 - Enter your guess: ")
+    while True:
+        choice = input("Enter your choice: ")
 
-    try:
-        guess = int(guess)
-    except ValueError:
-        print("Please enter a valid number.\n")
-        return play_game(number, attempt)
+        if choice == "1":
+            return 10
+        elif choice == "2":
+            return 8
+        elif choice == "3":
+            return 6
 
-    if guess < 1 or guess > 100:
-        print("Please enter a number between 1 and 100.\n")
-        return play_game(number, attempt)
+        print("Please enter 1, 2, or 3.")
 
-    check_guess = lambda x, y: "correct" if x == y else (
-        "low" if x < y else "high"
-    )
 
-    result = check_guess(guess, number)
+def play_game():
+    print("\n==============================")
+    print("      WORD GUESSING GAME")
+    print("==============================")
 
-    if result == "correct":
-        print("\nCongratulations! You guessed the correct number!")
-        print("You guessed it in", attempt, "attempt(s).")
-        return
+    category = choose_category()
+    attempts = choose_difficulty()
 
-    if result == "low":
-        print("Too Low! Try a higher number.\n")
+    word = random.choice(words[category])
+    guessed_letters = []
+    score = 0
+
+    display_word = ["_"] * len(word)
+
+    print("\nCategory:", category)
+    print("The word has", len(word), "letters.")
+    print("You have", attempts, "attempts.")
+
+    while attempts > 0 and "_" in display_word:
+        print("\nWord:", " ".join(display_word))
+        print("Attempts left:", attempts)
+
+        if guessed_letters:
+            print("Guessed letters:", ", ".join(guessed_letters))
+
+        guess = input("Enter a letter: ").lower()
+
+        if len(guess) != 1 or not guess.isalpha():
+            print("Please enter one letter.")
+            continue
+
+        if guess in guessed_letters:
+            print("You already guessed that letter.")
+            continue
+
+        guessed_letters.append(guess)
+
+        if guess in word:
+            print("Correct guess!")
+
+            for i in range(len(word)):
+                if word[i] == guess:
+                    display_word[i] = guess
+
+            score += 10
+
+        else:
+            print("Wrong guess!")
+            attempts -= 1
+            score -= 2
+
+    if "_" not in display_word:
+        print("\nCongratulations! You guessed the word!")
+        print("The word was:", word)
+        print("Your score:", max(score, 0))
     else:
-        print("Too High! Try a lower number.\n")
+        print("\nGame Over!")
+        print("The correct word was:", word)
+        print("Your score:", max(score, 0))
 
-    play_game(number, attempt + 1)
+
+def main():
+    print("Welcome to the Word Guessing Game!")
+
+    while True:
+        play_game()
+
+        again = input("\nDo you want to play again? (yes/no): ").lower()
+
+        if again != "yes":
+            print("\nThank you for playing!")
+            break
 
 
-# Start the game
-display_rules()
-
-random_number = random.randint(1, 100)
-
-play_game(random_number)
+main()
